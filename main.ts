@@ -1,31 +1,36 @@
-// ai-excited-01 entry (Node 22, standard library only). This program copies
-// the entry.png beside it to /output/entry.png. The image is the one made to
-// excite the AI judge: a colossal blue whale breaching straight up through a
-// quiet city street at golden dawn, water exploding around it into a crown of
-// spray, tiny cars dwarfed below on the wet asphalt. The gate takes a whole
-// PNG or JPEG of at most 1 MiB and 1024 by 1024 pixels, and the judge sees
-// exactly the bytes copied.
-//
-// Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
-//   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
+// ai-excited-01 — "JUDGE, LOOK UP!"
+// Copies the entry image (a colossal blue whale breaching through a city
+// street at golden dawn) to the output directory as entry.png.
+// Node 22, standard library only. No network, no randomness: the same
+// bytes go out on every run.
+import { copyFileSync, mkdirSync, readFileSync, statSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-import { copyFileSync, mkdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+const here: string = dirname(fileURLToPath(import.meta.url));
+const source: string = resolve(here, "entry.png");
+const outDir: string = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
+const target: string = join(outDir, "entry.png");
 
-const source = new URL('./entry.png', import.meta.url);
-const outputDir = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
-const outputPath = join(outputDir, 'entry.png');
+mkdirSync(outDir, { recursive: true });
+copyFileSync(source, target);
 
-// The grader's /output exists, but a local run may point at a fresh folder:
-// create the output directory when it is missing instead of failing.
-mkdirSync(outputDir, { recursive: true });
-
-copyFileSync(source, outputPath);
-
-// Guard against a truncated copy: the judge must see exactly the bytes of
-// the entry image, so refuse to finish when the sizes do not match.
-const sourceSize = statSync(source).size;
-const outputSize = statSync(outputPath).size;
-if (outputSize !== sourceSize) {
-  throw new Error(`entry.png copy incomplete: wrote ${outputSize} bytes, expected ${sourceSize}`);
+const from: number = statSync(source).size;
+const to: number = statSync(target).size;
+if (from !== to) {
+  throw new Error(`size mismatch: source ${from} bytes, wrote ${to} bytes`);
 }
+if (to > 1048576) {
+  throw new Error(`entry too large: ${to} bytes (limit 1048576)`);
+}
+// The gate tells PNG from JPEG by the first bytes, so make sure the copy
+// actually starts as one of them — a truncated or non-image source must
+// fail here, not in front of the judge.
+const head: Buffer = readFileSync(target).subarray(0, 8);
+const isJpeg: boolean = head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff;
+const isPng: boolean =
+  head[0] === 0x89 && head[1] === 0x50 && head[2] === 0x4e && head[3] === 0x47;
+if (!isJpeg && !isPng) {
+  throw new Error("entry.png is neither a JPEG nor a PNG (bad magic bytes)");
+}
+console.log(`wrote ${target} (${to} bytes)`);
