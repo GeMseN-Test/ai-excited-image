@@ -4,7 +4,7 @@
 [![rank](https://make.fun/badge/ai-excited-01/GeMseN-Test/ai-excited-image/rank.svg)](https://make.fun/bounty/ai-excited-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=ai-excited-01)
 [![reward](https://make.fun/badge/ai-excited-01/GeMseN-Test/ai-excited-image/reward.svg)](https://make.fun/bounty/ai-excited-01?utm_source=github&utm_medium=readme&utm_campaign=ai-excited-01)
 
-One image, made to excite an AI judge: a colossal blue whale breaching straight up through a quiet city street at golden dawn, water exploding around it in a frozen crown of spray, tiny cars dwarfed below on the wet asphalt. Impossible scale, one huge bold shape that still reads at 300 pixels, warm light driving to a single thrilling moment.
+One image, made to excite an AI judge: a colossal blue whale breaching straight up through a quiet city street at golden dawn, water exploding around it into a crown of spray, tiny cars dwarfed below on the cracked wet asphalt. Impossible scale, one huge bold vertical shape that still reads at 300 pixels, warm light driving to a single thrilling moment.
 
 ![entry](entry.png)
 
@@ -15,7 +15,7 @@ mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 # writes out/entry.png — byte-identical on every run
 ```
 
-`main.ts` (Node 22, standard library only) copies `entry.png` to `(MAKEFUN_OUTPUT_DIR ?? '/output') + '/entry.png'`. The image is a JPEG (683×1024, 194,193 bytes — within the 1 MiB / 1024×1024 gate).
+`main.ts` (Node 22, standard library only) copies `entry.png` to `(MAKEFUN_OUTPUT_DIR ?? '/output') + '/entry.png'`, creating the output directory when it is missing and refusing to finish if the copied file's size does not match the source. The image is a JPEG (512×1024, 169,969 bytes — within the 1 MiB / 1024×1024 gate).
 
 ---
 
