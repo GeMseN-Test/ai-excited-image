@@ -1,9 +1,9 @@
-// ai-excited-01 — "JUDGE, LOOK UP!" (v5)
+// ai-excited-01 — "JUDGE, LOOK UP!" (v7)
 // Copies the entry image — a colossal blue whale breaching straight up
 // through a quiet city street at golden dawn, water exploding around it,
-// tiny cars dwarfed below — to the output directory as entry.png.
-// Node 22, standard library only. No network, no randomness: every run
-// writes the exact same bytes.
+// tiny onlookers craning their necks below — to the output directory
+// as entry.png. Node 22, standard library only. No network, no
+// randomness: every run writes the exact same bytes.
 import { copyFileSync, mkdirSync, readFileSync, statSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { dirname, join, resolve } from "node:path";
@@ -41,4 +41,41 @@ const isPng: boolean =
 if (!isJpeg && !isPng) {
   throw new Error("entry.png is neither a JPEG nor a PNG (bad magic bytes)");
 }
-console.log(`wrote ${target} (${written} bytes)`);
+// Dimensions matter too: the gate caps the image at 1024x1024, so read
+// them straight out of the file instead of trusting the filename.
+// JPEG: walk the markers to a Start-Of-Frame segment (height then width).
+// PNG: width/height sit at fixed offsets inside the IHDR chunk.
+if (isJpeg) {
+  const buf: Buffer = readFileSync(target);
+  let pos = 2; // past SOI
+  let width = 0;
+  let height = 0;
+  while (pos + 9 < buf.length) {
+    if (buf[pos] !== 0xff) break;
+    const marker: number = buf[pos + 1];
+    if (marker === 0xda) break; // start of scan: image data follows
+    const len: number = buf.readUInt16BE(pos + 2);
+    if (marker === 0xc0 || marker === 0xc1 || marker === 0xc2) {
+      height = buf.readUInt16BE(pos + 5);
+      width = buf.readUInt16BE(pos + 7);
+      break;
+    }
+    pos += 2 + len;
+  }
+  if (width === 0 || height === 0) {
+    throw new Error("could not read JPEG dimensions (no SOF segment found)");
+  }
+  if (width > 1024 || height > 1024) {
+    throw new Error(`entry too big: ${width}x${height} (limit 1024x1024)`);
+  }
+  console.log(`dimensions ${width}x${height} within 1024x1024 gate`);
+} else {
+  const buf: Buffer = readFileSync(target);
+  const width: number = buf.readUInt32BE(16);
+  const height: number = buf.readUInt32BE(20);
+  if (width > 1024 || height > 1024) {
+    throw new Error(`entry too big: ${width}x${height} (limit 1024x1024)`);
+  }
+  console.log(`dimensions ${width}x${height} within 1024x1024 gate`);
+}
+console.log(`wrote ${target} (${written} bytes, sha256 ${targetHash.slice(0, 16)}…)`);
