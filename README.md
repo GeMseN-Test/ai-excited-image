@@ -4,7 +4,7 @@
 [![rank](https://make.fun/badge/ai-excited-01/GeMseN-Test/ai-excited-image/rank.svg)](https://make.fun/bounty/ai-excited-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=ai-excited-01)
 [![reward](https://make.fun/badge/ai-excited-01/GeMseN-Test/ai-excited-image/reward.svg)](https://make.fun/bounty/ai-excited-01?utm_source=github&utm_medium=readme&utm_campaign=ai-excited-01)
 
-One image, made to excite an AI judge: a colossal blue whale breaching straight up through a quiet city street at golden dawn, water exploding around it into a crown of spray, tiny onlookers craning their necks below on the cracked wet asphalt — and a huge golden shout across the sky: "JUDGE, LOOK UP!". Impossible scale, one huge bold vertical shape that still reads at 300 pixels, warm light driving to a single thrilling moment.
+One image, made to excite an AI judge: a colossal blue whale breaching straight up through a quiet city street at golden dawn, water exploding around it into a crown of spray, tiny onlookers craning their necks below on the cracked wet asphalt — and a huge golden shout across the sky: "JUDGE, LOOK UP!". Impossible scale, one huge bold vertical shape that still reads at a glance, warm dawn light driving to a single thrilling moment. The whale fills the whole street; the street, the spray and the shout all point at it.
 
 ![entry](entry.png)
 
@@ -15,7 +15,7 @@ mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 # writes out/entry.png — byte-identical on every run
 ```
 
-`main.ts` (Node 22, standard library only) copies `entry.png` to `(MAKEFUN_OUTPUT_DIR ?? '/output') + '/entry.png'`, creating the output directory when it is missing and refusing to finish if the copied file's size or SHA-256 does not match the source, if it is over the 1 MiB gate, if it does not start with valid JPEG/PNG magic bytes, or if its dimensions exceed 1024×1024 (read straight from the JPEG SOF segment). The image is a JPEG (512×1024, 145,889 bytes — within the 1 MiB / 1024×1024 gate).
+`main.ts` (Node 22, standard library only) copies `entry.png` to `(MAKEFUN_OUTPUT_DIR ?? '/output') + '/entry.png'`, creating the output directory when it is missing. It refuses to finish if the source is over the 1 MiB gate, if its dimensions (read straight from the JPEG SOF segment) exceed 1024×1024, or if the copied file's size or SHA-256 does not match the source. The image is a JPEG (512×1024, 171,650 bytes — within the 1 MiB / 1024×1024 gate).
 
 ---
 
